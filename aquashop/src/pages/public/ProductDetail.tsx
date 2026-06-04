@@ -69,24 +69,39 @@ export default function ProductDetail() {
         <div className="max-w-5xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-            {/* Gambar */}
-            <div className="relative aspect-square bg-bg-light rounded-2xl overflow-hidden">
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-8xl" aria-hidden="true">
-                  🐟
-                </div>
-              )}
-              {isOutOfStock && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <span className="badge bg-gray-800 text-white text-sm font-bold px-4 py-2">
-                    Stok Habis
-                  </span>
+            {/* Gambar & Video */}
+            <div className="space-y-4">
+              <div className="relative aspect-square bg-bg-light rounded-2xl overflow-hidden">
+                {product.image_url ? (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-8xl" aria-hidden="true">
+                    🐟
+                  </div>
+                )}
+                {isOutOfStock && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="badge bg-gray-800 text-white text-sm font-bold px-4 py-2">
+                      Stok Habis
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Video */}
+              {product.video_url && (
+                <div className="rounded-2xl overflow-hidden bg-black">
+                  <video
+                    src={product.video_url}
+                    controls
+                    className="w-full max-h-72 object-contain"
+                    aria-label={`Video ${product.name}`}
+                    preload="metadata"
+                  />
                 </div>
               )}
             </div>

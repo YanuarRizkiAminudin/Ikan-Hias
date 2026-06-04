@@ -64,6 +64,9 @@ export default function ProductForm() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(null)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
 
   // Pre-fill when editing
   useEffect(() => {
@@ -80,6 +83,7 @@ export default function ProductForm() {
         is_featured: product.is_featured,
       })
       if (product.image_url) setImagePreview(product.image_url)
+      if (product.video_url) setVideoPreview(product.video_url)
     }
   }, [isEdit, product])
 
@@ -111,6 +115,17 @@ export default function ProductForm() {
     setImagePreview(URL.createObjectURL(file))
   }
 
+  const handleVideoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 50 * 1024 * 1024) {
+      toastError('Ukuran video maksimal 50 MB')
+      return
+    }
+    setVideoFile(file)
+    setVideoPreview(URL.createObjectURL(file))
+  }
+
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return null
     try {
@@ -133,6 +148,28 @@ export default function ProductForm() {
     }
   }
 
+  const uploadVideo = async (): Promise<string | null> => {
+    if (!videoFile) return null
+    try {
+      setUploadingVideo(true)
+      const ext      = videoFile.name.split('.').pop()
+      const fileName = `videos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, videoFile, { upsert: false, contentType: videoFile.type })
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName)
+      return data.publicUrl
+    } catch (err) {
+      throw err
+    } finally {
+      setUploadingVideo(false)
+    }
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const validationErrors = validate(form)
@@ -149,6 +186,11 @@ export default function ProductForm() {
         imageUrl = await uploadImage()
       }
 
+      let videoUrl: string | null | undefined = undefined
+      if (videoFile) {
+        videoUrl = await uploadVideo()
+      }
+
       const payload = {
         name:        form.name.trim(),
         slug:        form.slug.trim(),
@@ -160,6 +202,7 @@ export default function ProductForm() {
         status:      form.status,
         is_featured: form.is_featured,
         ...(imageUrl !== undefined ? { image_url: imageUrl } : {}),
+        ...(videoUrl !== undefined ? { video_url: videoUrl } : {}),
       }
 
       if (isEdit) {
@@ -361,12 +404,46 @@ export default function ProductForm() {
           <p className="text-xs text-gray-400">JPG, PNG, atau WebP. Maks 5 MB.</p>
         </div>
 
+        {/* Video */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+          <h2 className="font-extrabold text-text-dark">Video Produk</h2>
+          <p className="text-xs text-gray-400">Opsional — tampil di halaman detail produk.</p>
+          {videoPreview && (
+            <div className="relative rounded-xl overflow-hidden bg-black">
+              <video
+                src={videoPreview}
+                controls
+                className="w-full max-h-64 object-contain"
+                aria-label="Preview video produk"
+              />
+              <button
+                type="button"
+                onClick={() => { setVideoFile(null); setVideoPreview(null) }}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-red-600"
+                aria-label="Hapus video"
+              >
+                ×
+              </button>
+            </div>
+          )}
+          <label className="block">
+            <span className="sr-only">Pilih video produk</span>
+            <input
+              type="file"
+              accept="video/mp4,video/webm,video/ogg,video/quicktime"
+              onChange={handleVideoChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-bg-light file:text-primary hover:file:bg-blue-100 cursor-pointer"
+            />
+          </label>
+          <p className="text-xs text-gray-400">MP4, WebM, atau MOV. Maks 50 MB.</p>
+        </div>
+
         {/* Actions */}
         <div className="flex gap-3">
           <Button
             type="submit"
             variant="secondary"
-            loading={saving || uploadingImage}
+            loading={saving || uploadingImage || uploadingVideo}
           >
             {isEdit ? 'Simpan Perubahan' : 'Tambah Produk'}
           </Button>

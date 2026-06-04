@@ -18,6 +18,7 @@ export interface Product {
   stock:       number
   size:        string | null
   image_url:   string | null
+  video_url:   string | null
   is_featured: boolean
   status:      'active' | 'inactive' | 'out_of_stock'
   created_at:  string
