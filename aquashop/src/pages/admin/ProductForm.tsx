@@ -392,16 +392,34 @@ export default function ProductForm() {
               </button>
             </div>
           )}
-          <label className="block">
-            <span className="sr-only">Pilih foto produk</span>
+          <label
+            className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${
+              imagePreview ? 'border-primary bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-blue-50 hover:border-primary'
+            }`}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => {
+              e.preventDefault()
+              const file = e.dataTransfer.files?.[0]
+              if (file) {
+                if (!file.type.startsWith('image/')) { toastError('File harus berupa gambar'); return }
+                if (file.size > 5 * 1024 * 1024) { toastError('Ukuran file maksimal 5 MB'); return }
+                setImageFile(file)
+                setImagePreview(URL.createObjectURL(file))
+              }
+            }}
+          >
+            <span className="text-3xl mb-2">🖼️</span>
+            <span className="text-sm font-semibold text-gray-600">
+              {imagePreview ? 'Ganti foto — klik atau drag & drop' : 'Klik atau drag & drop foto ke sini'}
+            </span>
+            <span className="text-xs text-gray-400 mt-1">JPG, PNG, WebP — maks 5 MB</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-bg-light file:text-primary hover:file:bg-blue-100 cursor-pointer"
+              className="hidden"
             />
           </label>
-          <p className="text-xs text-gray-400">JPG, PNG, atau WebP. Maks 5 MB.</p>
         </div>
 
         {/* Video */}
@@ -426,16 +444,34 @@ export default function ProductForm() {
               </button>
             </div>
           )}
-          <label className="block">
-            <span className="sr-only">Pilih video produk</span>
+          <label
+            className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${
+              videoPreview ? 'border-primary bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-blue-50 hover:border-primary'
+            }`}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => {
+              e.preventDefault()
+              const file = e.dataTransfer.files?.[0]
+              if (file) {
+                if (!file.type.startsWith('video/')) { toastError('File harus berupa video'); return }
+                if (file.size > 50 * 1024 * 1024) { toastError('Ukuran video maksimal 50 MB'); return }
+                setVideoFile(file)
+                setVideoPreview(URL.createObjectURL(file))
+              }
+            }}
+          >
+            <span className="text-3xl mb-2">🎬</span>
+            <span className="text-sm font-semibold text-gray-600">
+              {videoPreview ? 'Ganti video — klik atau drag & drop' : 'Klik atau drag & drop video ke sini'}
+            </span>
+            <span className="text-xs text-gray-400 mt-1">MP4, WebM, MOV — maks 50 MB</span>
             <input
               type="file"
               accept="video/mp4,video/webm,video/ogg,video/quicktime"
               onChange={handleVideoChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-bg-light file:text-primary hover:file:bg-blue-100 cursor-pointer"
+              className="hidden"
             />
           </label>
-          <p className="text-xs text-gray-400">MP4, WebM, atau MOV. Maks 50 MB.</p>
         </div>
 
         {/* Actions */}
