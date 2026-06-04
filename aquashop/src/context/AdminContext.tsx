@@ -33,7 +33,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', s.user.id)
-            .single()
+            .maybeSingle()
           setProfile(data ?? null)
         }
       } catch (_err) {
@@ -54,7 +54,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', s.user.id)
-            .single()
+            .maybeSingle()
           setProfile(data ?? null)
         } catch (_err) {
           setProfile(null)
